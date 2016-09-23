@@ -113,19 +113,6 @@ The data you need is available at:
 
 
 
-Notes:
-- Characters are case sensitive.
-- Do not use the previous regex `\w+` to split --- depending on your system
-  configuration, this may only match English characters, which would severely
-  skew entropy estimates for Thai. Be careful about unicode.
-- Please treat all whitespace as the same character.  You can do this by 
-  `" ".join(text.split())`
-- For reference, the exact code we use to extract text is:
-     ```
-     wikicode = mwparserfromhell.parse(text)
-     text = " ".join(" ".join(fragment.value.split())
-                     for fragment in wikicode.filter_text())
-     ```
 
 
 ## link_stats_simple
