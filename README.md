@@ -9,7 +9,7 @@ dataset is available (pre-chunked) on
 
 ## top100_words_simple_plain
 Return a list of the top 100 words in article text (in no particular order).
-You will need to write this as two map reduces:
+I accomplished this with two map reduces:
 
 1. The first job is similar to standard wordcount but with a few tweaks. 
    The data provided for wikipedia is in in \*.xml.bz2 format.  Mrjob will
@@ -63,15 +63,7 @@ formatting, you'll realize that these are xml tags.  You should parse the files
 so that tags like `<page></page>` should not be included in your total, nor
 should words outside of the tag `<text></text>`.
 
-*Hints*:
-1. Both `xml.etree.elementtree` from the Python stdlib or `lxml.etree` parse
-   xml. `lxml` is significantly faster though.
 
-2. In order to parse the text, we will have to accumulate a `<page></page>`
-   worth of data and then parse the resulting Wikipedia format string.
-
-3. Don't forget that the Wikipedia format can have multiple revisions but you
-   only want the latest one.
 
 **Checkpoint**
 Total unique words: 868,223
@@ -119,9 +111,7 @@ The data you need is available at:
     - https://s3.amazonaws.com/thedataincubator-course/mrdata/simple/part-000\*
     - https://s3.amazonaws.com/thedataincubator-course/mrdata/thai/part-000\*
 
-*Question*: Why do we need to use map-reduce? There are >300 million characters
-in this dataset. How much memory would it take to store all `n`-grams as `n`
-increases?
+
 
 Notes:
 - Characters are case sensitive.
@@ -137,26 +127,6 @@ Notes:
                      for fragment in wikicode.filter_text())
      ```
 
-A naive implementation of this job will take a very long time to run.  Instead,
-we will need to use a few optimizations:
-1. See [http://www.johndcook.com/blog/2013/08/17/calculating-entropy/] on how
-   to calculate entropy efficiently.
-2. It turns out that writing to disk is the most expensive part of a
-   map-reduce.  (Zipf's law)[https://en.wikipedia.org/wiki/Zipf's_law] tells us
-   that only a handful (relatively-speaking) of n-grams make up most of our
-   observations.  Can you do a map-side cache of these values to reduce the
-   number of writes?
-3. Entropy is a function of the count distribution, i.e. it is independent of
-   which ngrams correspond to which counts.  If we have N singleton ngrams,
-   it's more efficient to (somehow) encode that as "N singleton ngrams" rather
-   than as N key-value pairs:
-        (word1, 1)
-        (word2, 1)
-        (word3, 1)
-        ...
-   Can you use a in-memory cache to solve this problem?  What fraction of
-   ngrams only occur once?  How much of a speedup do you expect to get from
-   this optimization?
 
 ## link_stats_simple
 Let's look at some summary statistics on the number of unique links on a page
