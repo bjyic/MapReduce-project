@@ -1,53 +1,9 @@
 # MapReduce-project
 # Overview
-We are going to be running mapreduce jobs on the wikipedia dataset.  The
+In this project, I am going to run mapreduce jobs on the wikipedia dataset.  The
 dataset is available (pre-chunked) on
 [s3](s3://thedataincubator-course/mrdata/simple/).
 
-For development, you can even use a single chunk:
-```
-wget https://s3.amazonaws.com/thedataincubator-course/mrdata/simple/part-00026.xml.bz2
-```
-
-That is small enough that mrjob can process the it in a few seconds.
-Your development cycle should be:
-
-  1. Get your job to work locally on one chunk.  This will greatly speed up your
-development.
-  2. Get your job to work locally on the full dataset.
-
-If you want to structure your mrjob code well, you will want to have
-multiple mrjobs in a single module.  As a matter of good style, we recommend
-that you write each separate mapreduce as it's own class.  Then write a wrapper
-module that defines the logic for combining steps.  You can combine multiple
-steps by overriding the [steps
-method](https://pythonhosted.org/mrjob/guides/writing-mrjobs.html#multi-step-jobs).
-
-You can run jobs on full datasets as follows (using simple as an example):
-```
-python mrjob.py -r hadoop job_file.py s3n://thedataincubator-course/mrdata/simple/
-```
-
-Here are some helpful articles on how mrjob works and how to pass parameters to
-your script:
-  - [How mrjob is
-    run](https://pythonhosted.org/mrjob/guides/concepts.html#how-your-program-is-run)
-  - [Adding passthrough
-  options](https://pythonhosted.org/mrjob/job.html#mrjob.job.MRJob.add_passthrough_option)
-  - [An example of someone solving similar
-  problems](http://arunxjacob.blogspot.com/2013/11/hadoop-streaming-with-mrjob.html)
-
-Finally, if you are find yourself processing a lot of special cases, you are
-probably doing it wrong.  For example, mapreduce jobs for
-`Top100WordsSimpleWikipediaPlain`, `Top100WordsSimpleWikipediaText`, and
-`Top100WordsSimpleWikipediaNoMetaData` are less than 150 lines of code
-(including generous blank lines and biolerplate code)
-
-# Submission                                                                                                                                                                                                 
-Replace the default values in `__init__.py` with your answers. Avoid running
-"on-the-fly" computations or scripts in this file. Ideally it should be a
-static list which you paste in or load from file. The less moving parts there
-are, the easier it is on the grader.
 
 # Questions
 
@@ -225,53 +181,3 @@ The same thing but for all of English Wikipedia.  This is the real test of how
 well your algorithm scales!  The data is also located on
 [s3](s3://thedataincubator-course/mrdata/english/).
 
-**Note**
-Because of the size of the dataset, this job may take several hours to complete.
-It's advisable to run it overnight once you're reasonably sure it will work
-(due to testing the code on smaller inputs).
-
-As a barometer, our reference solution takes around 5 hours to run.
-
-## double_link_stats_simple
-Instead of analyzing single links, let's look at double links.  That is, pages
-A and C that are connected through many pages B where there is a link 
-`A -> B -> C` or `C -> B -> A'. Find the list of all pairs `(A, C)` (you can
-use alphabetical ordering to break symmetry) that have the 100 "most"
-connections (see below for the definition of "most").  This should give us a
-notion that the articles `A` and `C` refer to tightly related concepts.
-
-1. This is essentially a Matrix Multiplication problem.  If the adjacency
-   matrix is denoted $M$ (where $M_{ij}$ represents the link between $i$ an
-   $j$), we are looking for the highest 100 elements of the matrix $M M$.
-
-2. Notice that a lot of Category pages (denoted "Category:.*") have a high link
-   count and will rank very highly according to this metric.  Wikipedia also
-   has `Talk:` pages, `Help:` pages, and static resource `Files:`.  All such
-   "non-content" pages (and there might be more than just this) and links to
-   them should be first filtered out in this analysis.
-
-3. Some pages have more links than others.  If we just counted the number of
-   double links between pages, we will end up seeing a list of articles with
-   many links, rather than concepts that are tightly connected.
-
-   1. One strategy is to weight each link as $\frac{1}{n}$ where $n$ is the
-      number links on the page.  This way, an article has to spread it's
-      "influence" over all $n$ of its links.  However, this can throw off the
-      results if $n$ is small.
-
-   2. Instead, try weighting each link as $\frac{1}{n+10}$ where 10 sets the
-      "scale" in terms of number of links above which a page becomes
-      "significant".  The number 10 was somewhat arbitrarily chosen but seems
-      to give reasonably relevant results.
-
-   3. This means that our "count" for a pair A,C will be the products of the
-      two link weights between them, summed up over all their shared
-      connections.
-
-4. Again, if there are multiple links from a page to another, have it only
-   count for 1.  This keeps our results from becoming skewed by a single page
-   that references the same page multiple times.
-
-Don't be afraid if these answers are not particularly insightful.  Simple
-Wikipedia is not as rich as English Wikipedia.  However, you should notice that
-the articles are closely related conceptually.
