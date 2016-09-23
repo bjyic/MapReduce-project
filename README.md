@@ -107,11 +107,6 @@ per-character entropy estimates vary based off of n?  How should they vary by
 the size of the corpus? How much data would we need to get reasonable entropy
 estimates for each n?
 
-The data you need is available at:
-    - https://s3.amazonaws.com/thedataincubator-course/mrdata/simple/part-000\*
-    - https://s3.amazonaws.com/thedataincubator-course/mrdata/thai/part-000\*
-
-
 
 
 
@@ -121,20 +116,8 @@ to other Wikipedia articles.  Return the number of articles (count), average
 number of links, standard deviation, and the 5%, 25%, median, 75%, and 95%
 quantiles.
 
-1. Notice that the library `mwparserfromhell` supports the method
-   `filter_wikilinks()`.
-2. You will need to compute these statistics in a way that requires O(1)
-   memory.  You should be able to compute the first few (i.e. non-quantile)
-   statistics exactly by looking at the first few moments of a distribution.
-   The quantile quantities can be accurately estimated by using reservoir
-   sampling with a large reservoir.
-3. If there are multiple links to the article have it only count for 1.  This
-   keeps our results from becoming too skewed.
-4. Don't forget that some (a surprisingly large number of) links have unicode!
-   Make sure you treat them correctly.
 
 ## link_stats_english
 The same thing but for all of English Wikipedia.  This is the real test of how
-well your algorithm scales!  The data is also located on
-[s3](s3://thedataincubator-course/mrdata/english/).
+well your algorithm scales!  
 
